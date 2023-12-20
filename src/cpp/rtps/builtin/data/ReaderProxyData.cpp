@@ -287,14 +287,6 @@ uint32_t ReaderProxyData::get_serialized_size(
         ret_val += fastdds::dds::QosPoliciesSerializer<DisablePositiveACKsQosPolicy>::cdr_serialized_size(
             m_qos.m_disablePositiveACKs);
     }
-    if (m_type_id && m_type_id->m_type_identifier._d() != 0)
-    {
-        ret_val += fastdds::dds::QosPoliciesSerializer<TypeIdV1>::cdr_serialized_size(*m_type_id);
-    }
-    if (m_type && m_type->m_type_object._d() != 0)
-    {
-        ret_val += fastdds::dds::QosPoliciesSerializer<TypeObjectV1>::cdr_serialized_size(*m_type);
-    }
     if (m_type_information && m_type_information->assigned())
     {
         ret_val +=
@@ -548,23 +540,14 @@ bool ReaderProxyData::writeToCDRMessage(
             return false;
         }
     }
-
-    if (m_type_id && m_type_id->m_type_identifier._d() != 0)
+    if (m_type_information && m_type_information->assigned())
     {
-        if (!fastdds::dds::QosPoliciesSerializer<TypeIdV1>::add_to_cdr_message(*m_type_id, msg))
+        if (!fastdds::dds::QosPoliciesSerializer<xtypes::TypeInformationParameter>::add_to_cdr_message(*
+                m_type_information, msg))
         {
             return false;
         }
     }
-
-    if (m_type && m_type->m_type_object._d() != 0)
-    {
-        if (!fastdds::dds::QosPoliciesSerializer<TypeObjectV1>::add_to_cdr_message(*m_type, msg))
-        {
-            return false;
-        }
-    }
-
     if (m_properties.size() > 0)
     {
         if (!fastdds::dds::ParameterSerializer<ParameterPropertyList_t>::add_to_cdr_message(m_properties, msg))
@@ -608,15 +591,6 @@ bool ReaderProxyData::writeToCDRMessage(
     {
         if (!fastdds::dds::QosPoliciesSerializer<TypeConsistencyEnforcementQosPolicy>::add_to_cdr_message(m_qos.
                         type_consistency, msg))
-        {
-            return false;
-        }
-    }
-
-    if (m_type_information && m_type_information->assigned())
-    {
-        if (!fastdds::dds::QosPoliciesSerializer<xtypes::TypeInformationParameter>::add_to_cdr_message(*
-                m_type_information, msg))
         {
             return false;
         }
@@ -962,6 +936,7 @@ bool ReaderProxyData::readFromCDRMessage(
                     }
                     case fastdds::dds::PID_TYPE_INFORMATION:
                     {
+                        std::cout << "READER PID_TYPE_INFORMATION" << std::endl;
                         if (!fastdds::dds::QosPoliciesSerializer<xtypes::TypeInformationParameter>::
                                 read_from_cdr_message(type_information(), msg, plength))
                         {

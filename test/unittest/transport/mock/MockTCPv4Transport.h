@@ -15,20 +15,16 @@
 #ifndef MOCK_TRANSPORT_TCP4_STUFF_H
 #define MOCK_TRANSPORT_TCP4_STUFF_H
 
-#include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastdds/rtps/transport/TCPv4TransportDescriptor.h>
 #include <fastrtps/utils/IPLocator.h>
+
 #include <rtps/transport/TCPv4Transport.h>
 
 namespace eprosima {
-namespace fastrtps {
+namespace fastdds {
 namespace rtps {
 
-using TCPv4Transport = eprosima::fastdds::rtps::TCPv4Transport;
-using TCPChannelResource = eprosima::fastdds::rtps::TCPChannelResource;
-using TCPChannelResourceBasic = eprosima::fastdds::rtps::TCPChannelResourceBasic;
-#if TLS_FOUND
-using TCPChannelResourceSecure = eprosima::fastdds::rtps::TCPChannelResourceSecure;
-#endif // if TLS_FOUND
+using Locator_t = eprosima::fastrtps::rtps::Locator_t;
 
 class MockTCPv4Transport : public TCPv4Transport
 {
@@ -44,7 +40,7 @@ public:
             SendResourceList&,
             const Locator_t& locator) override
     {
-        const Locator_t& physicalLocator = IPLocator::toPhysicalLocator(locator);
+        const Locator_t& physicalLocator = fastrtps::rtps::IPLocator::toPhysicalLocator(locator);
         std::shared_ptr<TCPChannelResource> channel(
 #if TLS_FOUND
             (configuration_.apply_security) ?
@@ -59,19 +55,6 @@ public:
         return true;
     }
 
-    /*
-       virtual bool CloseOutputChannel(const Locator_t& locator) override
-       {
-       const Locator_t& physicalLocator = IPLocator::toPhysicalLocator(locator);
-       auto it = channel_resources_.find(physicalLocator);
-       if (it != channel_resources_.end())
-       {
-        delete it->second;
-        channel_resources_.erase(it);
-       }
-       return true;
-       }
-     */
 };
 
 } // namespace rtps

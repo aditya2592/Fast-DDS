@@ -488,7 +488,8 @@ bool ParticipantProxyData::readFromCDRMessage(
                         else
                         {
                             Locator_t temp_locator;
-                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration))
+                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration,
+                                    m_guid))
                             {
                                 ProxyDataFilters::filter_locators(
                                     is_shm_transport_available,
@@ -515,7 +516,8 @@ bool ParticipantProxyData::readFromCDRMessage(
                         else
                         {
                             Locator_t temp_locator;
-                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration))
+                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration,
+                                    m_guid))
                             {
                                 ProxyDataFilters::filter_locators(
                                     is_shm_transport_available,
@@ -542,7 +544,8 @@ bool ParticipantProxyData::readFromCDRMessage(
                         else
                         {
                             Locator_t temp_locator;
-                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration))
+                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration,
+                                    m_guid))
                             {
                                 ProxyDataFilters::filter_locators(
                                     is_shm_transport_available,
@@ -569,7 +572,8 @@ bool ParticipantProxyData::readFromCDRMessage(
                         else
                         {
                             Locator_t temp_locator;
-                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration))
+                            if (network.transform_remote_locator(p.locator, temp_locator, m_networkConfiguration,
+                                    m_guid))
                             {
                                 ProxyDataFilters::filter_locators(
                                     is_shm_transport_available,

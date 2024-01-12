@@ -55,9 +55,9 @@ public:
      * multicast range, it joins the specified multicast group,
      */
     bool OpenInputChannel(
-            const Locator&,
-            TransportReceiverInterface*,
-            uint32_t) override;
+        const Locator&,
+        TransportReceiverInterface*,
+        uint32_t) override;
 
     LocatorList NormalizeLocator(
             const Locator& locator) override;
@@ -122,7 +122,8 @@ protected:
     asio::ip::udp generate_protocol() const override;
     void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-            bool return_loopback = false) override;
+            bool return_loopback = false,
+            bool fetch_cached = true) override;
     const std::string& localhost_name() override;
     eProsimaUDPSocket OpenAndBindInputSocket(
             const std::string& sIp,
@@ -143,6 +144,9 @@ protected:
     bool is_interface_allowed(
             const std::string& interface) const override;
 
+    bool is_interface_allowed(
+            const Locator& loc) const;
+
     //! Checks if the interfaces white list is empty.
     bool is_interface_whitelist_empty() const override;
     std::vector<asio::ip::address_v6> interface_whitelist_;
@@ -156,9 +160,9 @@ protected:
             const std::string&) override;
 
     //! Checks if the IP address is the same without taking into account the scope of the IPv6 address
-    bool compare_ips(
+    static bool compare_ips(
             const std::string& ip1,
-            const std::string& ip2) const;
+            const std::string& ip2);
 };
 
 } // namespace rtps

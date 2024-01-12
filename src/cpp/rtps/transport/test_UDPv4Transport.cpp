@@ -147,12 +147,13 @@ bool test_UDPv4TransportDescriptor::operator ==(
 
 void test_UDPv4Transport::get_ips(
         std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-        bool return_loopback)
+        bool return_loopback,
+        bool fetch_cached)
 {
 
     if (!simulate_no_interfaces)
     {
-        UDPv4Transport::get_ips(locNames, return_loopback);
+        UDPv4Transport::get_ips(locNames, return_loopback, fetch_cached);
         return;
     }
 

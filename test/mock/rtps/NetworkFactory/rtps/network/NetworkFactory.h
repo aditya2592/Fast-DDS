@@ -55,6 +55,22 @@ public:
         return true;
     }
 
+    bool transform_remote_locator(
+            const Locator_t& remote_locator,
+            Locator_t& result_locator,
+            const NetworkConfigSet_t&,
+            const GuidPrefix_t&) const
+    {
+        result_locator = remote_locator;
+        return true;
+    }
+
+    bool is_locator_supported(
+            const Locator_t&) const
+    {
+        return true;
+    }
+
     bool is_locator_allowed(
             const Locator_t&) const
     {

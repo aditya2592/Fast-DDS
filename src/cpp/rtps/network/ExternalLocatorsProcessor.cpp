@@ -176,20 +176,9 @@ static bool address_matches(
         const uint8_t* addr2,
         uint64_t num_bits)
 {
-    uint64_t full_bytes = num_bits / 8;
-    if ((0 == full_bytes) || std::equal(addr1, addr1 + full_bytes, addr2))
-    {
-        uint64_t rem_bits = num_bits % 8;
-        if (rem_bits == 0)
-        {
-            return true;
-        }
+    // TODO: remove? only used in match_with_mask
 
-        uint8_t mask = 0xFF << (8 - rem_bits);
-        return (addr1[full_bytes] & mask) == (addr2[full_bytes] & mask);
-    }
-
-    return false;
+    return LocatorWithMask::address_matches(addr1, addr2, num_bits);
 }
 
 /**
@@ -204,24 +193,8 @@ static bool match_with_mask(
         const LocatorWithMask& local_locator,
         const Locator& remote_locator)
 {
-    if (local_locator.kind == remote_locator.kind)
-    {
-        switch (local_locator.kind)
-        {
-            case LOCATOR_KIND_UDPv4:
-            case LOCATOR_KIND_TCPv4:
-                assert(32 >= local_locator.mask());
-                return address_matches(remote_locator.address + 12, local_locator.address + 12, local_locator.mask());
-
-            case LOCATOR_KIND_UDPv6:
-            case LOCATOR_KIND_TCPv6:
-            case LOCATOR_KIND_SHM:
-                assert(128 >= local_locator.mask());
-                return address_matches(remote_locator.address, local_locator.address, local_locator.mask());
-        }
-    }
-
-    return false;
+    // TODO: do as above, or just remove this static method
+    return local_locator.matches(remote_locator);
 }
 
 static constexpr uint64_t heuristic_value(

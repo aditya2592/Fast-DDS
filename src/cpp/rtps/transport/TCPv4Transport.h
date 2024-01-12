@@ -84,7 +84,8 @@ protected:
 
     virtual void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-            bool return_loopback = false) const override;
+            bool return_loopback = false,
+            bool fetch_cached = true) const override;
 
     /**
      * Method to get a list of interfaces to bind the socket associated to the given locator.

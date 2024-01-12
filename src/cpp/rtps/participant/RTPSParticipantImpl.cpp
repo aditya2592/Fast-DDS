@@ -238,6 +238,19 @@ RTPSParticipantImpl::RTPSParticipantImpl(
     // User defined transports
     for (const auto& transportDescriptor : m_att.userTransports)
     {
+        auto socket_descriptor =
+                std::dynamic_pointer_cast<fastdds::rtps::SocketTransportDescriptor>(transportDescriptor);
+        if (socket_descriptor != nullptr)
+        {
+            if (!fastrtps::rtps::NetmaskFilter::validate_and_transform(socket_descriptor->netmask_filter,
+                    PParam.netmaskFilter))
+            {
+                EPROSIMA_LOG_ERROR(RTPS_PARTICIPANT,
+                        "User transport failed to register. Provided descriptor's netmask filter is incompatible with participant's.");
+                continue;
+            }
+        }
+
         if (m_network_Factory.RegisterTransport(transportDescriptor.get(), &m_att.properties))
         {
             has_shm_transport_ |=
@@ -1289,6 +1302,8 @@ void RTPSParticipantImpl::update_attributes(
     {
         LocatorList_t metatraffic_unicast_locator_list = m_att.builtin.metatrafficUnicastLocatorList;
         get_default_metatraffic_locators();
+        // TODO: the result of this comparisson (double check) depends on NormalizeLocators (which calls getIPs), hence the cached interfaces should be manually updated prior to this point
+        // Replace this comparisson for an output of a SystemInfo::update_interfaces (true if different, false otherwise)?
         if (!(metatraffic_unicast_locator_list == m_att.builtin.metatrafficUnicastLocatorList))
         {
             local_interfaces_changed = true;
@@ -1960,8 +1975,8 @@ void RTPSParticipantImpl::deleteAllUserEndpoints()
     auto removeEndpoint = [this](EndpointKind_t kind, Endpoint* p)
             {
                 return kind == WRITER
-               ? mp_builtinProtocols->removeLocalWriter((RTPSWriter*)p)
-               : mp_builtinProtocols->removeLocalReader((RTPSReader*)p);
+                       ? mp_builtinProtocols->removeLocalWriter((RTPSWriter*)p)
+                       : mp_builtinProtocols->removeLocalReader((RTPSReader*)p);
             };
 
 #if HAVE_SECURITY
@@ -2741,7 +2756,7 @@ const fastdds::statistics::rtps::IStatusObserver* RTPSParticipantImpl::create_mo
                 WriterHistory* hist,
                 WriterListener* listen,
                 const EntityId_t& entityId,
-                bool isBuiltin)-> bool
+                bool isBuiltin) -> bool
                 {
                     return this->createWriter(WriterOut, param, payload_pool, hist, listen, entityId, isBuiltin);
                 },

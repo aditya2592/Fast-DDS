@@ -19,6 +19,8 @@
 
 #include <fastdds/rtps/attributes/ThreadSettings.hpp>
 #include <fastdds/rtps/common/Locator.h>
+#include <fastdds/rtps/common/LocatorWithMask.hpp>
+#include <fastdds/rtps/transport/NetmaskFilter.h>
 
 #include <rtps/transport/ChannelResource.h>
 
@@ -31,7 +33,19 @@ class UDPTransportInterface;
 
 #if defined(ASIO_HAS_MOVE)
 // Typedefs
-typedef asio::ip::udp::socket eProsimaUDPSocket;
+class eProsimaUDPSocket : public asio::ip::udp::socket
+{
+public:
+
+    explicit eProsimaUDPSocket(
+            asio::io_service& io_service)
+        : asio::ip::udp::socket(io_service)
+    {
+    }
+
+    LocatorWithMask locator;
+    fastrtps::rtps::NetmaskFilterKind netmask_filter = fastrtps::rtps::NetmaskFilterKind::AUTO;
+};
 typedef eProsimaUDPSocket& eProsimaUDPSocketRef;
 
 // UDP
@@ -56,7 +70,7 @@ inline eProsimaUDPSocket moveSocket(
 inline eProsimaUDPSocket createUDPSocket(
         asio::io_service& io_service)
 {
-    return asio::ip::udp::socket(io_service);
+    return eProsimaUDPSocket(io_service);
 }
 
 inline eProsimaUDPSocket& getRefFromPtr(
@@ -67,7 +81,19 @@ inline eProsimaUDPSocket& getRefFromPtr(
 
 #else
 // Typedefs
-typedef std::shared_ptr<asio::ip::udp::socket> eProsimaUDPSocket;
+class eProsimaUDPSocket : public std::shared_ptr<asio::ip::udp::socket>
+{
+public:
+
+    explicit eProsimaUDPSocket(
+            asio::io_service& io_service)
+        : asio::ip::udp::socket(io_service)
+    {
+    }
+
+    LocatorWithMask locator;
+    fastrtps::rtps::NetmaskFilterKind netmask_filter = fastrtps::rtps::NetmaskFilterKind::AUTO;
+};
 typedef eProsimaUDPSocket eProsimaUDPSocketRef;
 
 // UDP
@@ -92,7 +118,7 @@ inline eProsimaUDPSocket moveSocket(
 inline eProsimaUDPSocket createUDPSocket(
         asio::io_service& io_service)
 {
-    return std::make_shared<asio::ip::udp::socket>(io_service);
+    return std::make_shared<eProsimaUDPSocket>(io_service);
 }
 
 inline eProsimaUDPSocket getRefFromPtr(

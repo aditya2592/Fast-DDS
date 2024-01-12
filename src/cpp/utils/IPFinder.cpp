@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <bitset>
 #include <string.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -187,6 +188,10 @@ bool IPFinder::getIPs(
 
         if (family == AF_INET)
         {
+            info_IP info;
+            info.type = IP4;
+            info.dev = std::string(ifa->ifa_name);
+
             s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in),
                             host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0)
@@ -194,19 +199,31 @@ bool IPFinder::getIPs(
                 EPROSIMA_LOG_WARNING(UTILS, "getnameinfo() failed: " << gai_strerror(s));
                 continue;
             }
-            info_IP info;
-            info.type = IP4;
             info.name = std::string(host);
-            info.dev = std::string(ifa->ifa_name);
-            parseIP4(info);
 
-            if (return_loopback || info.type != IP4_LOCAL)
+            s = getnameinfo(ifa->ifa_netmask, sizeof(struct sockaddr_in),
+                            host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (s != 0)
             {
-                vec_name->push_back(info);
+                EPROSIMA_LOG_WARNING(UTILS, "getnameinfo() failed: " << gai_strerror(s));
+                continue;
+            }
+            info.netmask = std::string(host);
+
+            if (parseIP4(info))
+            {
+                if (return_loopback || info.type != IP4_LOCAL)
+                {
+                    vec_name->push_back(info);
+                }
             }
         }
         else if (family == AF_INET6)
         {
+            info_IP info;
+            info.type = IP6;
+            info.dev = std::string(ifa->ifa_name);
+
             s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in6),
                             host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0)
@@ -214,10 +231,17 @@ bool IPFinder::getIPs(
                 EPROSIMA_LOG_WARNING(UTILS, "getnameinfo() failed: " << gai_strerror(s));
                 continue;
             }
-            info_IP info;
-            info.type = IP6;
             info.name = std::string(host);
-            info.dev = std::string(ifa->ifa_name);
+
+            s = getnameinfo(ifa->ifa_netmask, sizeof(struct sockaddr_in),
+                            host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (s != 0)
+            {
+                EPROSIMA_LOG_WARNING(UTILS, "getnameinfo() failed: " << gai_strerror(s));
+                continue;
+            }
+            info.netmask = std::string(host);
+
             if (parseIP6(info))
             {
                 if (return_loopback || info.type != IP6_LOCAL)
@@ -505,13 +529,26 @@ bool IPFinder::getIP6Address(
 bool IPFinder::parseIP4(
         info_IP& info)
 {
-    info.locator.kind = 1;
+    info.locator.kind = LOCATOR_KIND_UDPv4;
     info.locator.port = 0;
     IPLocator::setIPv4(info.locator, info.name);
     if (IPLocator::isLocal(info.locator))
     {
         info.type = IP4_LOCAL;
     }
+
+    Locator_t netmask_locator;
+    netmask_locator.kind = LOCATOR_KIND_UDPv4;
+    netmask_locator.port = 0;
+    IPLocator::setIPv4(netmask_locator, info.netmask);
+    uint8_t netmask = 0;
+    for (const auto& addr_octet: netmask_locator.address)
+    {
+        netmask += std::bitset<8>(addr_octet).count();
+    }
+    info.masked_locator = info.locator;
+    info.masked_locator.mask(netmask);
+
     return true;
 }
 
@@ -525,13 +562,19 @@ bool IPFinder::parseIP6(
     {
         info.type = IP6_LOCAL;
     }
-    /*
-       cout << "IPSTRING: ";
-       for (auto it : hexdigits)
-       cout << it << " ";
-       cout << endl;
-       cout << "LOCATOR: " << *loc << endl;
-     */
+
+    Locator_t netmask_locator;
+    netmask_locator.kind = LOCATOR_KIND_UDPv6;
+    netmask_locator.port = 0;
+    IPLocator::setIPv6(netmask_locator, info.netmask);
+    uint8_t netmask = 0;
+    for (const auto& addr_octet: netmask_locator.address)
+    {
+        netmask += std::bitset<8>(addr_octet).count();
+    }
+    info.masked_locator = info.locator;
+    info.masked_locator.mask(netmask);
+
     return true;
 }
 

@@ -23,11 +23,13 @@
 
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <fastdds/rtps/attributes/ThreadSettings.hpp>
 
 #include <fastrtps/types/TypesBase.h>
+#include <fastrtps/utils/IPFinder.h>
 #include <utils/Host.hpp>
 
 #if defined(_WIN32) || defined(__unix__)
@@ -231,12 +233,22 @@ public:
     static std::string get_timestamp(
             const char* format = "%F %T");
 
+    static bool update_interfaces();
+
+    static bool get_ips(
+            std::vector<fastrtps::rtps::IPFinder::info_IP>& vec_name,
+            bool return_loopback,
+            bool fetch_cached = true);
+
 private:
 
     SystemInfo();
 
     static std::string environment_file_;
 
+    static bool cached_interfaces_;
+    static std::vector<fastrtps::rtps::IPFinder::info_IP> interfaces_;
+    static std::mutex interfaces_mtx_;
 };
 
 /**

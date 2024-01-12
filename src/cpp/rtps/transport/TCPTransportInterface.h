@@ -23,6 +23,8 @@
 #include <asio.hpp>
 #include <asio/steady_timer.hpp>
 
+#include <fastdds/rtps/common/LocatorWithMask.hpp>
+#include <fastdds/rtps/transport/NetmaskFilter.h>
 #include <fastdds/rtps/transport/TCPTransportDescriptor.h>
 #include <fastdds/rtps/transport/TransportInterface.h>
 #include <fastrtps/utils/IPFinder.h>
@@ -76,7 +78,7 @@ class TCPTransportInterface : public TransportInterface
 
 protected:
 
-    std::vector<fastrtps::rtps::IPFinder::info_IP> current_interfaces_;
+    std::vector<fastrtps::rtps::IPFinder::info_IP> current_interfaces_; // TODO: deprecate?
     asio::io_service io_service_;
     asio::io_service io_service_timers_;
 #if TLS_FOUND
@@ -102,6 +104,10 @@ protected:
     std::map<Locator, std::shared_ptr<TCPAcceptor>> acceptors_;
 
     eprosima::fastdds::statistics::rtps::OutputTrafficManager statistics_info_;
+
+    fastrtps::rtps::NetmaskFilterKind netmask_filter_;
+    std::vector<std::pair<fastdds::rtps::LocatorWithMask, fastrtps::rtps::NetmaskFilterKind>> allowed_interfaces_;
+    // std::vector<std::string> interface_blocklist_;
 
     TCPTransportInterface(
             int32_t transport_kind);
@@ -144,7 +150,8 @@ protected:
 
     virtual void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& loc_names,
-            bool return_loopback = false) const = 0;
+            bool return_loopback = false,
+            bool fetch_cached = true) const = 0;
 
     bool is_input_port_open(
             uint16_t port) const;
@@ -278,9 +285,9 @@ public:
      *   If there is an existing channel it registers the receiver resource.
      */
     virtual bool OpenInputChannel(
-            const Locator&,
-            TransportReceiverInterface*,
-            uint32_t) override;
+        const Locator&,
+        TransportReceiverInterface*,
+        uint32_t) override;
 
     //! Opens a socket on the given address and port (as long as they are white listed).
     bool OpenOutputChannel(

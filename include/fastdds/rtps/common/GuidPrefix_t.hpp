@@ -22,6 +22,8 @@
 #include <fastrtps/fastrtps_dll.h>
 #include <fastdds/rtps/common/Types.h>
 
+#include <utils/SystemInfo.hpp>
+
 #include <cstdint>
 #include <cstring>
 #include <sstream>
@@ -42,6 +44,13 @@ struct RTPS_DllAPI GuidPrefix_t
     GuidPrefix_t()
     {
         memset(value, 0, size);
+    }
+
+    bool is_from_this_host() const
+    {
+        uint16_t host_id = SystemInfo::instance().host_id();
+        return (value[2] == static_cast<octet>(host_id & 0xFF) &&
+               (value[3]) == static_cast<octet>((host_id >> 8) & 0xFF));
     }
 
     static GuidPrefix_t unknown()

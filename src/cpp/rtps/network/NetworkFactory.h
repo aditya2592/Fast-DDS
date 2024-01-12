@@ -113,6 +113,15 @@ public:
             Locator_t& result_locator,
             const NetworkConfigSet_t& remote_network_config) const;
 
+    bool transform_remote_locator(
+            const Locator_t& remote_locator,
+            Locator_t& result_locator,
+            const NetworkConfigSet_t& remote_network_config,
+            const GUID_t& guid) const;
+
+    bool is_locator_supported(
+            const Locator_t& locator) const;
+
     /**
      * Must report whether the given locator is allowed by at least one of the registered transports.
      *
@@ -134,6 +143,10 @@ public:
      */
     bool is_locator_remote_or_allowed(
             const Locator_t& locator) const;
+
+    bool is_locator_remote_or_allowed(
+            const Locator_t& locator,
+            const GUID_t& guid) const;
 
     /**
      * Perform the locator selection algorithm.
@@ -270,6 +283,10 @@ private:
             uint32_t domain_id,
             const RTPSParticipantAttributes& att,
             bool is_multicast) const;
+
+    bool valid_for_registration(
+            const fastdds::rtps::TransportDescriptorInterface* descriptor,
+            const fastrtps::rtps::PropertyPolicy* properties = nullptr) const;
 };
 
 } // namespace rtps

@@ -19,6 +19,7 @@
 #include <vector>
 #include <string>
 
+#include <fastdds/rtps/transport/NetmaskFilter.h>
 #include <fastdds/rtps/transport/PortBasedTransportDescriptor.hpp>
 
 namespace eprosima {
@@ -50,6 +51,7 @@ struct SocketTransportDescriptor : public PortBasedTransportDescriptor
         : PortBasedTransportDescriptor(maximumMessageSize, maximumInitialPeersRange)
         , sendBufferSize(0)
         , receiveBufferSize(0)
+        , netmask_filter(fastrtps::rtps::NetmaskFilterKind::AUTO)
         , TTL(s_defaultTTL)
     {
     }
@@ -77,6 +79,9 @@ struct SocketTransportDescriptor : public PortBasedTransportDescriptor
         return (this->sendBufferSize == t.min_send_buffer_size() &&
                this->receiveBufferSize == t.receiveBufferSize &&
                this->interfaceWhiteList == t.interfaceWhiteList &&
+               this->netmask_filter == t.netmask_filter &&
+               this->interface_allowlist == t.interface_allowlist &&
+               this->interface_blocklist == t.interface_blocklist &&
                this->TTL == t.TTL &&
                PortBasedTransportDescriptor::operator ==(t));
     }
@@ -87,6 +92,12 @@ struct SocketTransportDescriptor : public PortBasedTransportDescriptor
     uint32_t receiveBufferSize;
     //! Allowed interfaces in an IP string format.
     std::vector<std::string> interfaceWhiteList;
+    //! TODO
+    fastrtps::rtps::NetmaskFilterKind netmask_filter;
+    //! TODO
+    std::vector<std::pair<std::string, fastrtps::rtps::NetmaskFilterKind>> interface_allowlist;
+    //! TODO
+    std::vector<std::string> interface_blocklist;
     //! Specified time to live (8bit - 255 max TTL)
     uint8_t TTL;
 };

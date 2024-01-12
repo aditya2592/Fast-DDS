@@ -123,6 +123,12 @@ bool NetworkFactory::RegisterTransport(
 
     uint32_t minSendBufferSize = std::numeric_limits<uint32_t>::max();
 
+    // TODO: check and fail if other registered transport with same kind has incompatible netmask_filter => maybe need public method (getter) to TranportInterface
+    // use NetworkFactory::valid_for_registration here, or before transport->init (passing transport interface not descriptor, kind info available in transport)
+    // Or add this check in RTPSParticipantImpl.cpp (before calling RegisterTransport). Decide whether should fail participant creation if any incompatibility or just print warning/error.
+
+    // TODO: or generally enforce that no 2 users transports with same kind can be registered. Take into account that builtin may not be disabled
+
     std::unique_ptr<TransportInterface> transport(descriptor->create_transport());
 
     if (transport)
@@ -206,6 +212,52 @@ bool NetworkFactory::transform_remote_locator(
     return false;
 }
 
+bool NetworkFactory::transform_remote_locator(
+        const Locator_t& remote_locator,
+        Locator_t& result_locator,
+        const NetworkConfigSet_t& remote_network_config,
+        const GUID_t& guid) const
+{
+    if (!is_locator_supported(remote_locator))
+    {
+        return false;
+    }
+
+    if (!guid.is_from_this_host()) // is this valid? should be compatible with other vendors: assert there is no problem
+    // when communicating with other vendors (only transformation to localhost optimization not available.
+    // Should be the case anyway, as others vendors do not set netconfig)
+    {
+        result_locator = remote_locator;
+        // return is_locator_allowed(result_locator); // TODO: uncomment and delete below
+        bool loc_allowed = is_locator_allowed(result_locator);
+        if (loc_allowed)
+        {
+            return true;
+        }
+        else
+        {
+            std::cout << "Locator NOT ALLOWED (NetworkFactory): " << result_locator << std::endl;
+            return false;
+        }
+    }
+
+    return transform_remote_locator(remote_locator, result_locator, remote_network_config);
+}
+
+bool NetworkFactory::is_locator_supported(
+        const Locator_t& locator) const
+{
+    for (auto& transport : mRegisteredTransports)
+    {
+        if (transport->IsLocatorSupported(locator))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool NetworkFactory::is_locator_allowed(
         const Locator_t& locator) const
 {
@@ -224,6 +276,13 @@ bool NetworkFactory::is_locator_remote_or_allowed(
         const Locator_t& locator) const
 {
     return !is_local_locator(locator) || is_locator_allowed(locator);
+}
+
+bool NetworkFactory::is_locator_remote_or_allowed(
+        const Locator_t& locator,
+        const GUID_t& guid) const
+{
+    return (is_locator_supported(locator) && !guid.is_from_this_host()) || is_locator_allowed(locator);
 }
 
 void NetworkFactory::select_locators(
@@ -469,6 +528,18 @@ void NetworkFactory::update_network_interfaces()
     {
         transport->update_network_interfaces();
     }
+}
+
+bool NetworkFactory::valid_for_registration(
+        const TransportDescriptorInterface* descriptor,
+        const fastrtps::rtps::PropertyPolicy* properties) const
+{
+    bool is_valid = true;
+
+    // TODO: pretty ugly, dynamic_cast required for descriptor and for every registered transport.
+    // Perform checks to descriptors before registration? Maybe cleaner but what it registration of one of the selected fails?
+
+    return is_valid;
 }
 
 } // namespace rtps

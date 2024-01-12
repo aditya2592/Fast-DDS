@@ -66,7 +66,8 @@ protected:
 
     virtual void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-            bool return_loopback = false) override;
+            bool return_loopback = false,
+            bool fetch_cached = true) override;
 
 private:
 

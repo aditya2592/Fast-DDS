@@ -29,16 +29,20 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <time.h>
 
 #include <nlohmann/json.hpp>
+
 #include <fastrtps/types/TypesBase.h>
+#include <fastrtps/utils/IPFinder.h>
 #include <utils/threading.hpp>
 
 namespace eprosima {
 
+using IPFinder = fastrtps::rtps::IPFinder;
 using ReturnCode_t = fastrtps::types::ReturnCode_t;
 
 SystemInfo::SystemInfo()
@@ -52,6 +56,8 @@ SystemInfo::SystemInfo()
     tzset();
 #endif // if (_POSIX_C_SOURCE >= 1) || defined(_XOPEN_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE) ||
        // defined(_POSIX_SOURCE) || defined(__unix__)
+
+    update_interfaces();
 }
 
 ReturnCode_t SystemInfo::get_env(
@@ -277,7 +283,47 @@ std::string SystemInfo::get_timestamp(
     return stream.str();
 }
 
+bool SystemInfo::update_interfaces()
+{
+    std::lock_guard<std::mutex> lock(interfaces_mtx_);
+
+    bool ret = IPFinder::getIPs(&interfaces_, true);
+    if (ret)
+    {
+        // Set to true when successful, but not to false if lookup failed (may have been successfully cached before)
+        cached_interfaces_ = true;
+    }
+    return ret;
+}
+
+bool SystemInfo::get_ips(
+        std::vector<IPFinder::info_IP>& vec_name,
+        bool return_loopback,
+        bool fetch_cached)
+{
+    if (fetch_cached)
+    {
+        std::lock_guard<std::mutex> lock(interfaces_mtx_);
+        if (cached_interfaces_)
+        {
+            for (const auto& interface : interfaces_)
+            {
+                if (return_loopback || interface.type != IPFinder::IPTYPE::IP4_LOCAL ||
+                        interface.type != IPFinder::IPTYPE::IP6_LOCAL)
+                {
+                    vec_name.push_back(interface);
+                }
+            }
+            return true;
+        } // TODO: attempt update_interfaces if not cached or only allow manual update (and in singleton creation)?
+    }
+    return IPFinder::getIPs(&vec_name, return_loopback);
+}
+
 std::string SystemInfo::environment_file_;
+bool SystemInfo::cached_interfaces_;
+std::vector<IPFinder::info_IP> SystemInfo::interfaces_;
+std::mutex SystemInfo::interfaces_mtx_;
 
 } // eprosima
 

@@ -86,7 +86,8 @@ protected:
 
     virtual void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-            bool return_loopback = false) const override;
+            bool return_loopback = false,
+            bool fetch_cached = true) const override;
 
     /**
      * Method to get a list of interfaces to bind the socket associated to the given locator.
@@ -122,9 +123,9 @@ protected:
             Locator& locator) const override;
 
     //! Checks if the IP addresses are the same without taking into account the IPv6 scope
-    bool compare_ips(
+    static bool compare_ips(
             const std::string& ip1,
-            const std::string& ip2) const;
+            const std::string& ip2);
 
 public:
 

@@ -22,6 +22,8 @@
 
 #include <asio.hpp>
 
+#include <fastdds/rtps/common/LocatorWithMask.hpp>
+#include <fastdds/rtps/transport/NetmaskFilter.h>
 #include <fastdds/rtps/transport/TransportInterface.h>
 #include <fastdds/rtps/transport/UDPTransportDescriptor.h>
 #include <fastrtps/utils/IPFinder.h>
@@ -178,7 +180,7 @@ protected:
 
     // For UDPv6, the notion of channel corresponds to a port + direction tuple.
     asio::io_service io_service_;
-    std::vector<fastrtps::rtps::IPFinder::info_IP> currentInterfaces;
+    std::vector<fastrtps::rtps::IPFinder::info_IP> currentInterfaces; // TODO: deprecate?
 
     mutable std::recursive_mutex mInputMapMutex;
     std::map<uint16_t, std::vector<UDPChannelResource*>> mInputSockets;
@@ -189,6 +191,10 @@ protected:
 
     //! First time open output channel flag: open the first socket with the ip::multicast::enable_loopback
     bool first_time_open_output_channel_;
+
+    fastrtps::rtps::NetmaskFilterKind netmask_filter_;
+    std::vector<std::pair<fastdds::rtps::LocatorWithMask, fastrtps::rtps::NetmaskFilterKind>> allowed_interfaces_;
+    // std::vector<std::string> interface_blocklist_;
 
     UDPTransportInterface(
             int32_t transport_kind);
@@ -222,7 +228,8 @@ protected:
     virtual asio::ip::udp generate_protocol() const = 0;
     virtual void get_ips(
             std::vector<fastrtps::rtps::IPFinder::info_IP>& locNames,
-            bool return_loopback = false) = 0;
+            bool return_loopback = false,
+            bool fetch_cached = true) = 0;
     virtual const std::string& localhost_name() = 0;
 
     //! Checks if the interfaces white list is empty.

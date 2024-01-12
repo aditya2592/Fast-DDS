@@ -88,6 +88,11 @@ struct RTPS_DllAPI GUID_t
         return memcmp(guidPrefix.value, other_guid.guidPrefix.value, 4) == 0;
     }
 
+    bool is_from_this_host() const
+    {
+        return guidPrefix.is_from_this_host();
+    }
+
     /**
      * Checks whether this guid is for an entity on the same host and process as another guid.
      *

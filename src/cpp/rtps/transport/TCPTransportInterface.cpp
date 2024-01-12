@@ -455,7 +455,7 @@ bool TCPTransportInterface::init(
     }
 
     // TODO(Ricardo) Create an event that update this list.
-    get_ips(current_interfaces_);
+    get_ips(current_interfaces_); // TODO: deprecate?
 
     auto ioServiceFunction = [&]()
             {

@@ -171,7 +171,7 @@ bool UDPTransportInterface::init(
     }
 
     // TODO(Ricardo) Create an event that update this list.
-    get_ips(currentInterfaces);
+    get_ips(currentInterfaces); // TODO: deprecate?
 
     return true;
 }
@@ -317,6 +317,25 @@ bool UDPTransportInterface::OpenOutputChannel(
                     {
                         eProsimaUDPSocket multicastSocket =
                                 OpenAndBindUnicastOutputSocket(generate_endpoint((*locIt).name, new_port), new_port);
+                        multicastSocket.locator = (*locIt).masked_locator;
+                        // TODO: move logic below to OpenAndBindUnicastOutputSocket?
+                        auto it = std::find_if(
+                            allowed_interfaces_.begin(),
+                            allowed_interfaces_.end(),
+                            [&locIt](const std::pair<fastdds::rtps::LocatorWithMask,
+                            fastrtps::rtps::NetmaskFilterKind>& entry)
+                            {
+                                return (*locIt).masked_locator == entry.first;
+                            });
+
+                        if (it != allowed_interfaces_.end())
+                        {
+                            multicastSocket.netmask_filter = it->second;
+                        }
+                        else
+                        {
+                            multicastSocket.netmask_filter = netmask_filter_;
+                        }
                         SetSocketOutboundInterface(multicastSocket, (*locIt).name);
 
                         sender_resource_list.emplace_back(
@@ -341,6 +360,24 @@ bool UDPTransportInterface::OpenOutputChannel(
                 {
                     eProsimaUDPSocket unicastSocket =
                             OpenAndBindUnicastOutputSocket(generate_endpoint(infoIP.name, port), port);
+                    unicastSocket.locator = infoIP.masked_locator;
+                    auto it = std::find_if(
+                        allowed_interfaces_.begin(),
+                        allowed_interfaces_.end(),
+                        [&infoIP](const std::pair<fastdds::rtps::LocatorWithMask,
+                        fastrtps::rtps::NetmaskFilterKind>& entry)
+                        {
+                            return infoIP.masked_locator == entry.first;
+                        });
+
+                    if (it != allowed_interfaces_.end())
+                    {
+                        unicastSocket.netmask_filter = it->second;
+                    }
+                    else
+                    {
+                        unicastSocket.netmask_filter = netmask_filter_;
+                    }
                     SetSocketOutboundInterface(unicastSocket, infoIP.name);
                     if (first_time_open_output_channel_)
                     {
@@ -399,7 +436,18 @@ bool UDPTransportInterface::transform_remote_locator(
         if (!is_local_locator(result_locator))
         {
             // is_local_locator will return false for multicast addresses as well as remote unicast ones.
-            return true;
+            // return true;
+            // return is_locator_allowed(result_locator);  // Reject remote locators not allowed
+            bool loc_allowed = is_locator_allowed(result_locator);
+            if (loc_allowed)
+            {
+                return true;
+            }
+            else
+            {
+                std::cout << "Locator NOT ALLOWED (UDPTransportInterface): " << remote_locator << std::endl;
+                return false;
+            }
         }
 
         // If we get here, the locator is a local unicast address
@@ -486,11 +534,28 @@ bool UDPTransportInterface::send(
         return false;
     }
 
+    std::cout << "ATTEMPTING TO SEND from locator " << socket.locator << " to remote_locator " << remote_locator <<
+                        std::endl;
+
     bool success = false;
     bool is_multicast_remote_address = IPLocator::isMulticast(remote_locator);
 
+
     if (is_multicast_remote_address == only_multicast_purpose || whitelisted)
     {
+        if (!is_multicast_remote_address)
+        {
+            if (socket.netmask_filter == fastrtps::rtps::NetmaskFilterKind::ON && !socket.locator.matches(
+                        remote_locator))                                                                                   // TODO: collapse conditions
+            {
+                std::cout << "FILTERING from locator " << socket.locator << " to remote_locator " << remote_locator <<
+                                    std::endl;
+                return true;
+            }
+        }
+
+        std::cout << "SENDING from locator " << socket.locator << " to remote_locator " << remote_locator << std::endl;
+
         auto destinationEndpoint = generate_endpoint(remote_locator, IPLocator::getPhysicalPort(remote_locator));
 
         size_t bytesSent = 0;

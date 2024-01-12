@@ -53,6 +53,8 @@ public:
             fastrtps::rtps::LocatorsIterator* destination_locators_end,
             const std::chrono::steady_clock::time_point& max_blocking_time_point) -> bool
                 {
+                    // modify iterator here??
+
                     return transport.send(data, dataSize, socket_, destination_locators_begin,
                                    destination_locators_end, only_multicast_purpose_, whitelisted_,
                                    max_blocking_time_point);

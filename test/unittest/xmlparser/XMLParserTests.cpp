@@ -2193,7 +2193,8 @@ TEST_F(XMLParserTests, parseTLSConfigVerifyMode)
 
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
-        EXPECT_EQ(descriptor->tls_config.verify_mode, eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSVerifyMode::VERIFY_NONE);
+        EXPECT_EQ(descriptor->tls_config.verify_mode,
+                eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSVerifyMode::VERIFY_NONE);
     }
 
     // Check that the VERIFY_PEER setting return an xml ok code and is set correctly.
@@ -2208,7 +2209,8 @@ TEST_F(XMLParserTests, parseTLSConfigVerifyMode)
 
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
-        EXPECT_EQ(descriptor->tls_config.verify_mode, eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSVerifyMode::VERIFY_PEER);
+        EXPECT_EQ(descriptor->tls_config.verify_mode,
+                eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSVerifyMode::VERIFY_PEER);
     }
 
     // Check that the VERIFY_FAIL_IF_NO_PEER_CERT setting return an xml ok code and is set correctly.
@@ -2284,7 +2286,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::DEFAULT_WORKAROUNDS));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    DEFAULT_WORKAROUNDS));
     }
 
     // Check that the NO_COMPRESSION setting return an xml ok code and is set correctly.
@@ -2296,7 +2299,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_COMPRESSION));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_COMPRESSION));
     }
 
     // Check that the NO_SSLV2 setting return an xml ok code and is set correctly.
@@ -2308,7 +2312,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_SSLV2));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_SSLV2));
     }
 
     // Check that the NO_SSLV3 setting return an xml ok code and is set correctly.
@@ -2320,7 +2325,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_SSLV3));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_SSLV3));
     }
 
     // Check that the NO_TLSV1 setting return an xml ok code and is set correctly.
@@ -2332,7 +2338,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_TLSV1));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_TLSV1));
     }
 
     // Check that the NO_TLSV1_1 setting return an xml ok code and is set correctly.
@@ -2344,7 +2351,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_TLSV1_1));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_TLSV1_1));
     }
 
     // Check that the NO_TLSV1_2 setting return an xml ok code and is set correctly.
@@ -2356,7 +2364,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_TLSV1_2));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_TLSV1_2));
     }
 
     // Check that the NO_TLSV1_3 setting return an xml ok code and is set correctly.
@@ -2368,7 +2377,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::NO_TLSV1_3));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    NO_TLSV1_3));
     }
 
     // Check that the SINGLE_DH_USE setting return an xml ok code and is set correctly.
@@ -2380,7 +2390,8 @@ TEST_F(XMLParserTests, parseTLSConfigOptions)
         std::shared_ptr<eprosima::fastdds::rtps::TCPTransportDescriptor> descriptor =
                 std::dynamic_pointer_cast<eprosima::fastdds::rtps::TCPTransportDescriptor>(tcp_transport);
         EXPECT_TRUE(
-            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::SINGLE_DH_USE));
+            descriptor->tls_config.get_option(eprosima::fastdds::rtps::TCPTransportDescriptor::TLSConfig::TLSOptions::
+                    SINGLE_DH_USE));
     }
 }
 

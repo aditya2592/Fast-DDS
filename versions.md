@@ -1,5 +1,7 @@
 Forthcoming
 -----------
+* Removed deprecated FastRTPS API tests.
+* Removed no longer supported `FASTRTPS_API_TESTS` and `GTEST_INDIVIDUAL` CMake options.
 
 Version 2.13.0
 --------------
